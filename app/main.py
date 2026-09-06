@@ -5,6 +5,7 @@ from sqlalchemy import text
 from app.config import settings
 from app.database import SessionFactory
 from app.routers.auth_router import router as auth_router
+from app.routers.portfolio_router import public_router
 from app.routers.portfolio_router import router as portfolio_router
 
 app = FastAPI(title=settings.app_name, version="0.1.0")
@@ -16,6 +17,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.include_router(auth_router)
+app.include_router(public_router)
 app.include_router(portfolio_router)
 
 

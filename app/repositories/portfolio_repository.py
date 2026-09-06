@@ -5,7 +5,7 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.portfolio import Portfolio
+from app.models.portfolio import Portfolio, TradingWindow
 
 
 class PortfolioRepository:
@@ -45,3 +45,14 @@ class PortfolioRepository:
     async def delete(self, portfolio: Portfolio) -> None:
         await self.session.delete(portfolio)
         await self.session.flush()
+
+    async def list_distinct_tickers_by_trading_window(
+        self, trading_window: TradingWindow
+    ) -> list[str]:
+        query = (
+            select(Portfolio.ticker)
+            .where(Portfolio.trading_window == trading_window)
+            .distinct()
+            .order_by(Portfolio.ticker)
+        )
+        return list((await self.session.scalars(query)).all())

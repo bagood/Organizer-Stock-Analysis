@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import uuid
 
 from fastapi import HTTPException, status
@@ -5,7 +7,7 @@ from fastapi import HTTPException, status
 from app.exceptions import DuplicateTickerError, PortfolioNotFoundError
 from app.models.portfolio import Portfolio
 from app.models.user import User
-from app.schemas.portfolio import PortfolioCreate, PortfolioUpdate
+from app.schemas.portfolio import PortfolioCreate, PortfolioUpdate, PublicTradingWindow
 from app.services.portfolio_service import PortfolioService
 
 
@@ -53,3 +55,6 @@ class PortfolioController:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Portfolio not found"
             ) from exc
+
+    async def list_public_stocks(self, trading_window: PublicTradingWindow) -> list[str]:
+        return await self.service.list_public_stocks(trading_window)

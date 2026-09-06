@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import uuid
 
 from sqlalchemy.exc import IntegrityError
@@ -7,7 +9,7 @@ from app.exceptions import DuplicateTickerError, PortfolioNotFoundError
 from app.models.portfolio import Portfolio
 from app.models.user import User
 from app.repositories.portfolio_repository import PortfolioRepository
-from app.schemas.portfolio import PortfolioCreate, PortfolioUpdate
+from app.schemas.portfolio import PortfolioCreate, PortfolioUpdate, PublicTradingWindow
 
 
 class PortfolioService:
@@ -47,3 +49,8 @@ class PortfolioService:
         portfolio = await self.get(user, portfolio_id)
         await self.repository.delete(portfolio)
         await self.session.commit()
+
+    async def list_public_stocks(self, trading_window: PublicTradingWindow) -> list[str]:
+        return await self.repository.list_distinct_tickers_by_trading_window(
+            trading_window.to_portfolio_window()
+        )

@@ -1,10 +1,22 @@
 import uuid
 from datetime import datetime
 from decimal import Decimal
+from enum import StrEnum
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from app.models.portfolio import TradingWindow
+
+
+class PublicTradingWindow(StrEnum):
+    FIVE_DD = "5dd"
+    TEN_DD = "10dd"
+
+    def to_portfolio_window(self) -> TradingWindow:
+        return {
+            self.FIVE_DD: TradingWindow.FIVE_TO_TEN_DD,
+            self.TEN_DD: TradingWindow.TEN_TO_TWENTY_DD,
+        }[self]
 
 
 class PortfolioFields(BaseModel):

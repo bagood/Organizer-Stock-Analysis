@@ -62,3 +62,36 @@ async def test_users_cannot_access_each_others_portfolios(client):
     assert (
         await client.delete(f"/portfolios/{portfolio_id}", headers=bob_headers)
     ).status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_public_stock_list_is_unique_and_does_not_require_authentication(client):
+    alice_headers = await register_and_login(client, "alice")
+    bob_headers = await register_and_login(client, "bob")
+    carol_headers = await register_and_login(client, "carol")
+    dave_headers = await register_and_login(client, "dave")
+
+    records = [
+        (alice_headers, "BNBR", "10-20dd"),
+        (bob_headers, "BNBR", "10-20dd"),
+        (carol_headers, "BNBR", "5-10dd"),
+        (dave_headers, "BULL", "5-10dd"),
+    ]
+    for headers, ticker, window in records:
+        created = await client.post(
+            "/portfolios",
+            headers=headers,
+            json={"ticker": ticker, "price": "100", "trading_window": window},
+        )
+        assert created.status_code == 201
+
+    ten_day = await client.get("/stocks", params={"trading_window": "10dd"})
+    assert ten_day.status_code == 200
+    assert ten_day.json() == ["BNBR"]
+
+    five_day = await client.get("/stocks", params={"trading_window": "5dd"})
+    assert five_day.status_code == 200
+    assert five_day.json() == ["BNBR", "BULL"]
+
+    invalid = await client.get("/stocks", params={"trading_window": "20dd"})
+    assert invalid.status_code == 422

@@ -7,9 +7,15 @@ from app.controllers.portfolio_controller import PortfolioController
 from app.dependencies.authentication import get_current_user
 from app.dependencies.services import get_portfolio_controller
 from app.models.user import User
-from app.schemas.portfolio import PortfolioCreate, PortfolioResponse, PortfolioUpdate
+from app.schemas.portfolio import (
+    PortfolioCreate,
+    PortfolioResponse,
+    PortfolioUpdate,
+    PublicTradingWindow,
+)
 
 router = APIRouter(prefix="/portfolios", tags=["portfolios"])
+public_router = APIRouter(prefix="/stocks", tags=["public stocks"])
 
 
 def response(portfolio, username: str) -> PortfolioResponse:
@@ -24,6 +30,15 @@ def response(portfolio, username: str) -> PortfolioResponse:
             "updated_at": portfolio.updated_at,
         }
     )
+
+
+@public_router.get("", response_model=list[str])
+async def list_public_stocks(
+    trading_window: PublicTradingWindow,
+    controller: Annotated[PortfolioController, Depends(get_portfolio_controller)],
+) -> list[str]:
+    """List unique stocks for a window without requiring authentication."""
+    return await controller.list_public_stocks(trading_window)
 
 
 @router.post("", response_model=PortfolioResponse, status_code=status.HTTP_201_CREATED)

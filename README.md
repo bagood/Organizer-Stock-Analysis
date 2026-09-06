@@ -109,6 +109,36 @@ Portfolio endpoints:
 | `PATCH` | `/portfolios/{id}` | Partially update an owned record |
 | `DELETE` | `/portfolios/{id}` | Delete an owned record |
 
+### Public stock list
+
+`GET /stocks` is intentionally public and does not require a JWT or password. It returns
+unique ticker symbols, sorted alphabetically, across every user's portfolio for the selected
+trading window.
+
+The public query values map to the stored database values as follows:
+
+| Query value | Stored trading window |
+|---|---|
+| `5dd` | `5-10dd` |
+| `10dd` | `10-20dd` |
+
+Examples:
+
+```bash
+curl 'http://localhost:8000/stocks?trading_window=5dd'
+curl 'http://localhost:8000/stocks?trading_window=10dd'
+```
+
+Example response:
+
+```json
+["BNBR", "BULL"]
+```
+
+Any other query value is rejected with HTTP `422`. This endpoint exposes ticker membership
+across all users by design, but it does not expose usernames, prices, portfolio IDs, or other
+account data.
+
 Authentication endpoints are `POST /auth/register`, `POST /auth/login`, and `GET /auth/me`.
 Passwords must contain 12-128 characters. Usernames must contain 3-50 lowercase-normalized
 letters, numbers, dots, underscores, or hyphens.
