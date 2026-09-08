@@ -32,6 +32,11 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    networks:
+      default:
+      stock-backend:
+        aliases:
+          - organizer-api
     restart: unless-stopped
 
   test-db:
@@ -64,3 +69,8 @@ services:
 
 volumes:
   postgres_data:
+
+networks:
+  stock-backend:
+    external: true
+    name: stock-analysis-backend
