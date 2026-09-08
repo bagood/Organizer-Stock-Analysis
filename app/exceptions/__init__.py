@@ -24,3 +24,7 @@ class PortfolioNotFoundError(ApplicationError):
 
 class DuplicateTickerError(ApplicationError):
     pass
+
+
+class DailyChatLimitExceededError(ApplicationError):
+    pass

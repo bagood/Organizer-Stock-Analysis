@@ -143,6 +143,31 @@ Authentication endpoints are `POST /auth/register`, `POST /auth/login`, and `GET
 Passwords must contain 12-128 characters. Usernames must contain 3-50 lowercase-normalized
 letters, numbers, dots, underscores, or hyphens.
 
+### Daily chat quota
+
+Each authenticated user has a daily LLM chat allowance. Set its maximum with
+`CHAT_DAILY_LIMIT` in `.env`; it must be a positive integer. Usage resets at midnight UTC,
+and changing the configured maximum changes every user's effective allowance immediately.
+
+Check the current allowance without consuming it:
+
+```bash
+curl http://localhost:8000/chat-quota \
+  -H 'Authorization: Bearer YOUR_ACCESS_TOKEN'
+```
+
+Atomically check and consume one chat immediately before an LLM request:
+
+```bash
+curl -X POST http://localhost:8000/chat-quota/consume \
+  -H 'Authorization: Bearer YOUR_ACCESS_TOKEN'
+```
+
+The response includes `remaining`, `daily_limit`, and the UTC `resets_at` timestamp. The
+request that reduces `remaining` to zero succeeds. Later requests receive HTTP `429` and a
+`Retry-After` header until the next reset. User identity always comes from the JWT; clients
+cannot consume another user's allowance by supplying a username or user ID.
+
 ## Migrations
 
 The API applies committed migrations at container startup. To run them manually:

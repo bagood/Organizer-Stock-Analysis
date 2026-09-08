@@ -24,6 +24,7 @@ services:
       DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg://stock_app:local-development-password@db:5432/stock_organizer}
       JWT_SECRET_KEY: ${JWT_SECRET_KEY:-local-only-secret-key-change-before-production}
       ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-30}
+      CHAT_DAILY_LIMIT: ${CHAT_DAILY_LIMIT:-20}
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000,http://localhost:5173}
     volumes:
       - .:/app
@@ -63,6 +64,7 @@ services:
       DATABASE_URL: postgresql+psycopg://stock_test:stock_test_password@test-db:5432/stock_organizer_test
       JWT_SECRET_KEY: test-secret-key-that-is-long-enough-for-tests
       ACCESS_TOKEN_EXPIRE_MINUTES: 30
+      CHAT_DAILY_LIMIT: 3
     depends_on:
       test-db:
         condition: service_healthy
