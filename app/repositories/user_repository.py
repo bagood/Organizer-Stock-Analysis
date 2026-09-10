@@ -17,6 +17,14 @@ class UserRepository:
     async def get_by_id(self, user_id: uuid.UUID) -> User | None:
         return await self.session.get(User, user_id)
 
+    async def lock_by_id(self, user_id: uuid.UUID) -> User | None:
+        return await self.session.scalar(
+            select(User)
+            .where(User.id == user_id)
+            .with_for_update()
+            .execution_options(populate_existing=True)
+        )
+
     async def create(self, username: str, password_hash: str) -> User:
         user = User(username=username, password_hash=password_hash)
         self.session.add(user)

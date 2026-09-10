@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = Field(default=30, gt=0)
     chat_daily_limit: int = Field(default=20, gt=0)
+    chat_history_retention_days: int = Field(default=30, gt=0)
     cors_origins: str = "http://localhost:3000,http://localhost:5173"
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")

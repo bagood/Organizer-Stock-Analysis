@@ -22,7 +22,7 @@ class User(Base):
     )
     chat_usage_date: Mapped[date] = mapped_column(
         Date,
-        server_default=text("((CURRENT_TIMESTAMP AT TIME ZONE 'UTC')::date)"),
+        server_default=text("((CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta')::date)"),
         nullable=False,
     )
     created_at: Mapped[datetime] = mapped_column(
@@ -33,5 +33,8 @@ class User(Base):
     )
 
     portfolios: Mapped[list["Portfolio"]] = relationship(  # noqa: F821
+        back_populates="user", cascade="all, delete-orphan"
+    )
+    chat_conversations: Mapped[list["ChatConversation"]] = relationship(  # noqa: F821
         back_populates="user", cascade="all, delete-orphan"
     )

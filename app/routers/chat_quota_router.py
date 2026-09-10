@@ -6,7 +6,11 @@ from app.controllers.chat_quota_controller import ChatQuotaController
 from app.dependencies.authentication import get_current_user
 from app.dependencies.services import get_chat_quota_controller
 from app.models.user import User
-from app.schemas.chat_quota import ChatQuotaResponse
+from app.schemas.chat_quota import (
+    ChatQuotaConsumeRequest,
+    ChatQuotaConsumeResponse,
+    ChatQuotaResponse,
+)
 
 router = APIRouter(prefix="/chat-quota", tags=["chat quota"])
 
@@ -20,10 +24,11 @@ async def get_chat_quota(
     return await controller.get(current_user)
 
 
-@router.post("/consume", response_model=ChatQuotaResponse)
+@router.post("/consume", response_model=ChatQuotaConsumeResponse)
 async def consume_chat_quota(
+    data: ChatQuotaConsumeRequest,
     current_user: Annotated[User, Depends(get_current_user)],
     controller: Annotated[ChatQuotaController, Depends(get_chat_quota_controller)],
-) -> ChatQuotaResponse:
-    """Atomically consume one chat from the current user's daily allowance."""
-    return await controller.consume(current_user)
+) -> ChatQuotaConsumeResponse:
+    """Atomically consume quota and persist a completed user/assistant turn."""
+    return await controller.consume(current_user, data)

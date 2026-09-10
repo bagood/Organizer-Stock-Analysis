@@ -145,9 +145,10 @@ letters, numbers, dots, underscores, or hyphens.
 
 ### Daily chat quota
 
-Each authenticated user has a daily LLM chat allowance. Set its maximum with
-`CHAT_DAILY_LIMIT` in `.env`; it must be a positive integer. Usage resets at midnight UTC,
-and changing the configured maximum changes every user's effective allowance immediately.
+Each authenticated user has a daily LLM chat allowance and a persisted conversation for
+the current day. Set the maximum with `CHAT_DAILY_LIMIT` in `.env`; it must be a positive
+integer. Usage and the active conversation reset at midnight in `Asia/Jakarta`. Changing
+the configured maximum changes every user's effective allowance immediately.
 
 Check the current allowance without consuming it:
 
@@ -156,17 +157,56 @@ curl http://localhost:8000/chat-quota \
   -H 'Authorization: Bearer YOUR_ACCESS_TOKEN'
 ```
 
-Atomically check and consume one chat immediately before an LLM request:
+Atomically consume one chat and persist the completed user/assistant turn:
 
 ```bash
 curl -X POST http://localhost:8000/chat-quota/consume \
+  -H 'Authorization: Bearer YOUR_ACCESS_TOKEN' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "query":"What is the outlook for BBCA?",
+    "answer":"BBCA currently shows...",
+    "client_message_id":"3fc82b96-3bd6-4b2e-b57d-30cc723ac784"
+  }'
+```
+
+The response includes the two stored messages and a `quota` object. `client_message_id` is
+an idempotency key: retrying it returns the original turn without charging quota again. The
+request that reduces `remaining` to zero succeeds. Later requests receive HTTP `429` and a
+`Retry-After` header until the next reset.
+
+Retrieve the current Jakarta day's conversation and quota together:
+
+```bash
+curl http://localhost:8000/chat-history \
   -H 'Authorization: Bearer YOUR_ACCESS_TOKEN'
 ```
 
-The response includes `remaining`, `daily_limit`, and the UTC `resets_at` timestamp. The
-request that reduces `remaining` to zero succeeds. Later requests receive HTTP `429` and a
-`Retry-After` header until the next reset. User identity always comes from the JWT; clients
-cannot consume another user's allowance by supplying a username or user ID.
+Users with no messages receive `200 OK`, a null conversation ID, and an empty message list.
+One daily conversation can contain any number of ordered query/answer turns up to the daily
+quota. User identity always comes from the JWT; clients cannot read or consume another
+user's data by supplying a username or user ID.
+
+Because the consume request contains an already-generated answer, this service cannot stop
+an upstream LLM call before discovering that quota is exhausted. Use a separate reservation
+step in front of the LLM if preventing that upstream work becomes a requirement.
+
+### Chat history retention
+
+Expired daily conversations are retained for 30 days by default. The API runs chat-history
+housekeeping once at startup and then every day at 00:15 in `Asia/Jakarta`. Conversations
+whose `expires_at` value is older than the retention cutoff are deleted; their messages are
+removed automatically through the database cascade.
+
+Set `CHAT_HISTORY_RETENTION_DAYS` to a positive integer to change the retention period. In a
+multi-replica deployment, each API replica may execute the idempotent cleanup. An external
+scheduler should be used instead if housekeeping must have single-run orchestration and
+independent operational monitoring.
+
+Services migrating from the previous body-less consume request should follow the
+[chat quota consumer migration guide](CHAT_QUOTA_CONSUMER_MIGRATION.md).
+Consumers restoring messages should follow the
+[chat history integration guide](CHAT_HISTORY_INTEGRATION.md).
 
 ## Migrations
 

@@ -9,7 +9,12 @@ from app.main import app
 @pytest.fixture(autouse=True)
 async def clean_database():
     async with SessionFactory() as session:
-        await session.execute(text("TRUNCATE TABLE portfolios, users RESTART IDENTITY CASCADE"))
+        await session.execute(
+            text(
+                "TRUNCATE TABLE chat_messages, chat_conversations, portfolios, users "
+                "RESTART IDENTITY CASCADE"
+            )
+        )
         await session.commit()
     yield
 
