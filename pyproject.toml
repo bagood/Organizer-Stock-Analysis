@@ -14,7 +14,7 @@ dependencies = [
   "pydantic-settings>=2.7,<3",
   "pwdlib[argon2]>=0.2,<1",
   "PyJWT>=2.10,<3",
-  "sqlalchemy>=2.0,<3",
+  "sqlalchemy[asyncio]>=2.0,<3",
   "uvicorn[standard]>=0.34,<1",
 ]
 
@@ -39,4 +39,3 @@ target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
-
