@@ -5,7 +5,7 @@ portfolio records. Users authenticate with a username and password, receive a JW
 token, and can only view or modify portfolio entries belonging to their own account.
 
 Each portfolio record stores a ticker, decimal price, trading window, and owner. The only
-valid trading windows are `5-10dd` and `10-20dd`.
+valid trading windows are `5dd` and `10dd`.
 
 ## Architecture
 
@@ -96,7 +96,7 @@ The response contains an `access_token`. Supply it to protected endpoints:
 curl -X POST http://localhost:8000/portfolios \
   -H 'Authorization: Bearer YOUR_ACCESS_TOKEN' \
   -H 'Content-Type: application/json' \
-  -d '{"ticker":"BBCA","price":"9200.0000","trading_window":"5-10dd"}'
+  -d '{"ticker":"BBCA","price":"9200.0000","trading_window":"5dd"}'
 ```
 
 Portfolio endpoints:
@@ -119,8 +119,8 @@ The public query values map to the stored database values as follows:
 
 | Query value | Stored trading window |
 |---|---|
-| `5dd` | `5-10dd` |
-| `10dd` | `10-20dd` |
+| `5dd` | `5dd` |
+| `10dd` | `10dd` |
 
 Examples:
 

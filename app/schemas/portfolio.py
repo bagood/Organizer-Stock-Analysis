@@ -14,8 +14,8 @@ class PublicTradingWindow(StrEnum):
 
     def to_portfolio_window(self) -> TradingWindow:
         return {
-            self.FIVE_DD: TradingWindow.FIVE_TO_TEN_DD,
-            self.TEN_DD: TradingWindow.TEN_TO_TWENTY_DD,
+            self.FIVE_DD: TradingWindow.FIVE_DD,
+            self.TEN_DD: TradingWindow.TEN_DD,
         }[self]
 
 

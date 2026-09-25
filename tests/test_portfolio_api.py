@@ -9,7 +9,7 @@ async def test_portfolio_crud_and_validation(client):
     created = await client.post(
         "/portfolios",
         headers=headers,
-        json={"ticker": "bbca", "price": "9200.25", "trading_window": "5-10dd"},
+        json={"ticker": "bbca", "price": "9200.25", "trading_window": "5dd"},
     )
     assert created.status_code == 201
     body = created.json()
@@ -21,10 +21,10 @@ async def test_portfolio_crud_and_validation(client):
     assert len(listed.json()) == 1
 
     updated = await client.patch(
-        f"/portfolios/{body['id']}", headers=headers, json={"trading_window": "10-20dd"}
+        f"/portfolios/{body['id']}", headers=headers, json={"trading_window": "10dd"}
     )
     assert updated.status_code == 200
-    assert updated.json()["trading_window"] == "10-20dd"
+    assert updated.json()["trading_window"] == "10dd"
 
     assert (await client.delete(f"/portfolios/{body['id']}", headers=headers)).status_code == 204
     assert (await client.get("/portfolios", headers=headers)).json() == []
@@ -38,7 +38,7 @@ async def test_portfolio_crud_and_validation(client):
     blank_ticker = await client.post(
         "/portfolios",
         headers=headers,
-        json={"ticker": " ", "price": "100", "trading_window": "5-10dd"},
+        json={"ticker": " ", "price": "100", "trading_window": "5dd"},
     )
     assert blank_ticker.status_code == 422
 
@@ -50,7 +50,7 @@ async def test_users_cannot_access_each_others_portfolios(client):
     created = await client.post(
         "/portfolios",
         headers=alice_headers,
-        json={"ticker": "BBRI", "price": "5000", "trading_window": "5-10dd"},
+        json={"ticker": "BBRI", "price": "5000", "trading_window": "5dd"},
     )
     portfolio_id = created.json()["id"]
 
@@ -72,10 +72,10 @@ async def test_public_stock_list_is_unique_and_does_not_require_authentication(c
     dave_headers = await register_and_login(client, "dave")
 
     records = [
-        (alice_headers, "BNBR", "10-20dd"),
-        (bob_headers, "BNBR", "10-20dd"),
-        (carol_headers, "BNBR", "5-10dd"),
-        (dave_headers, "BULL", "5-10dd"),
+        (alice_headers, "BNBR", "10dd"),
+        (bob_headers, "BNBR", "10dd"),
+        (carol_headers, "BNBR", "5dd"),
+        (dave_headers, "BULL", "5dd"),
     ]
     for headers, ticker, window in records:
         created = await client.post(

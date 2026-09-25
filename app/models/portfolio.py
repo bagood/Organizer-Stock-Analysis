@@ -19,8 +19,8 @@ from app.database import Base
 
 
 class TradingWindow(StrEnum):
-    FIVE_TO_TEN_DD = "5-10dd"
-    TEN_TO_TWENTY_DD = "10-20dd"
+    FIVE_DD = "5dd"
+    TEN_DD = "10dd"
 
 
 class Portfolio(Base):
